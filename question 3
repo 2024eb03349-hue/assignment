@@ -1,0 +1,41 @@
+#!/bin/bash
+
+FILE="marks.txt"
+
+# Check if file exists
+if [ ! -f "$FILE" ]; then
+    echo "Error: $FILE not found."
+    exit 1
+fi
+
+# Initialize counters
+FAILED_ONE_COUNT=0
+PASSED_ALL_COUNT=0
+
+echo "=== Students who failed in exactly ONE subject ==="
+while IFS=, read -r rollno name marks1 marks2 marks3; do
+    # Count failed subjects
+    failed_count=0
+    (( marks1 < 33 )) && ((failed_count++))
+    (( marks2 < 33 )) && ((failed_count++))
+    (( marks3 < 33 )) && ((failed_count++))
+    
+    if [ $failed_count -eq 1 ]; then
+        echo "$rollno, $name"
+        ((FAILED_ONE_COUNT++))
+    fi
+done < "$FILE"
+
+echo ""
+echo "=== Students who passed in ALL subjects ==="
+while IFS=, read -r rollno name marks1 marks2 marks3; do
+    if (( marks1 >= 33 && marks2 >= 33 && marks3 >= 33 )); then
+        echo "$rollno, $name"
+        ((PASSED_ALL_COUNT++))
+    fi
+done < "$FILE"
+
+echo ""
+echo "=== Summary ==="
+echo "Students who failed in exactly ONE subject: $FAILED_ONE_COUNT"
+echo "Students who passed in ALL subjects: $PASSED_ALL_COUNT"
