@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Check if exactly one argument is provided
+if [ $# -ne 1 ]; then
+    echo "Error: Exactly one argument is required."
+    echo "Usage: $0 <file_or_directory>"
+    exit 1
+fi
+
+# Check if the path exists
+if [ ! -e "$1" ]; then
+    echo "Error: '$1' does not exist."
+    exit 1
+fi
+
+# Check if it's a file
+if [ -f "$1" ]; then
+    echo "File: $1"
+    echo "Lines: $(wc -l < "$1")"
+    echo "Words: $(wc -w < "$1")"
+    echo "Characters: $(wc -m < "$1")"
+
+# Check if it's a directory
+elif [ -d "$1" ]; then
+    echo "Directory: $1"
+    echo "Total files: $(find "$1" -maxdepth 1 -type f | wc -l)"
+    echo "Total .txt files: $(find "$1" -maxdepth 1 -type f -name "*.txt" | wc -l)"
+else
+    echo "Error: '$1' is neither a file nor a directory."
+    exit 1
+fi
