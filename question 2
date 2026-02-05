@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Check if log file is provided
+if [ $# -ne 1 ]; then
+    echo "Error: Log file name required."
+    echo "Usage: $0 <logfile>"
+    exit 1
+fi
+
+LOG_FILE="$1"
+
+# Validate file exists and is readable
+if [ ! -f "$LOG_FILE" ]; then
+    echo "Error: File '$LOG_FILE' does not exist."
+    exit 1
+fi
+
+if [ ! -r "$LOG_FILE" ]; then
+    echo "Error: File '$LOG_FILE' is not readable."
+    exit 1
+fi
+
+# Generate report filename with current date
+REPORT_FILE="logsummary_$(date +%Y%m%d).txt"
+
+# Count total entries
+TOTAL_ENTRIES=$(wc -l < "$LOG_FILE")
+
+# Count by level
+INFO_COUNT=$(grep -c " INFO " "$LOG_FILE")
+WARNING_COUNT=$(grep -c " WARNING " "$LOG_FILE")
+ERROR_COUNT=$(grep -c " ERROR " "$LOG_FILE")
+
+# Get most recent ERROR message
+MOST_RECENT_ERROR=$(grep " ERROR " "$LOG_FILE" | tail -1)
+
+# Generate report
+{
+    echo "=== Log Analysis Report ==="
+    echo "Generated on: $(date)"
+    echo "Log file: $LOG_FILE"
+    echo ""
+    echo "=== Summary ==="
+    echo "Total log entries: $TOTAL_ENTRIES"
+    echo "INFO messages: $INFO_COUNT"
+    echo "WARNING messages: $WARNING_COUNT"
+    echo "ERROR messages: $ERROR_COUNT"
+    echo ""
+    echo "=== Most Recent ERROR ==="
+    echo "$MOST_RECENT_ERROR"
+    echo ""
+    echo "=== Analysis Complete ==="
+} > "$REPORT_FILE"
+
+# Display summary on screen
+echo "Log analysis completed successfully!"
+echo "Report generated: $REPORT_FILE"
+echo ""
+echo "Summary:"
+echo "Total entries: $TOTAL_ENTRIES"
+echo "INFO: $INFO_COUNT"
+echo "WARNING: $WARNING_COUNT"
+echo "ERROR: $ERROR_COUNT"
+echo ""
+echo "Most recent ERROR: $MOST_RECENT_ERROR"
