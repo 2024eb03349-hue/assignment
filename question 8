@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Check if directory is provided
+if [ $# -ne 1 ]; then
+    echo "Error: Directory path required."
+    echo "Usage: $0 <directory>"
+    exit 1
+fi
+
+DIR="$1"
+
+# Check if directory exists
+if [ ! -d "$DIR" ]; then
+    echo "Error: Directory '$DIR' does not exist."
+    exit 1
+fi
+
+# Create backup directory if it doesn't exist
+BACKUP_DIR="$DIR/backup"
+mkdir -p "$BACKUP_DIR"
+
+echo "Starting background move operations..."
+echo "Parent process PID: $$"
+echo ""
+
+# Array to store background process IDs
+PIDS=()
+
+# Move each file in background
+for file in "$DIR"/*; do
+    # Skip directories and backup folder
+    if [ -f "$file" ] && [ "$(dirname "$file")" != "$BACKUP_DIR" ]; then
+        filename=$(basename "$file")
+        echo "Moving $filename to backup..."
+        
+        # Move in background and capture PID
+        mv "$file" "$BACKUP_DIR/" &
+        PIDS+=($!)
+        echo "  Started process with PID: $!"
+    fi
+done
+
+echo ""
+echo "Waiting for all background processes to complete..."
+
+# Wait for all background processes
+for pid in "${PIDS[@]}"; do
+    wait "$pid"
+    echo "Process $pid completed."
+done
+
+echo ""
+echo "All files moved to $BACKUP_DIR"
