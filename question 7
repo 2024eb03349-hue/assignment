@@ -1,0 +1,47 @@
+#!/bin/bash
+
+INPUT_FILE="input.txt"
+VOWELS_FILE="vowels.txt"
+CONSONANTS_FILE="consonants.txt"
+MIXED_FILE="mixed.txt"
+
+# Check if input file exists
+if [ ! -f "$INPUT_FILE" ]; then
+    echo "Error: $INPUT_FILE not found."
+    exit 1
+fi
+
+# Clear output files
+> "$VOWELS_FILE"
+> "$CONSONANTS_FILE"
+> "$MIXED_FILE"
+
+# Read file and process each word
+while read -r line; do
+    # Split line into words
+    for word in $line; do
+        # Remove punctuation and convert to lowercase
+        clean_word=$(echo "$word" | tr -d '[:punct:]' | tr '[:upper:]' '[:lower:]')
+        
+        # Skip empty words
+        [ -z "$clean_word" ] && continue
+        
+        # Check if word contains only vowels
+        if echo "$clean_word" | grep -q '^[aeiou]*$'; then
+            echo "$word" >> "$VOWELS_FILE"
+        
+        # Check if word contains only consonants
+        elif echo "$clean_word" | grep -q '^[bcdfghjklmnpqrstvwxyz]*$'; then
+            echo "$word" >> "$CONSONANTS_FILE"
+        
+        # Check if word starts with consonant and has both vowels and consonants
+        elif echo "$clean_word" | grep -q '^[bcdfghjklmnpqrstvwxyz].*[aeiou].*'; then
+            echo "$word" >> "$MIXED_FILE"
+        fi
+    done
+done < "$INPUT_FILE"
+
+echo "Pattern matching completed:"
+echo "- Words with only vowels saved to: $VOWELS_FILE"
+echo "- Words with only consonants saved to: $CONSONANTS_FILE"
+echo "- Mixed words starting with consonants saved to: $MIXED_FILE"
