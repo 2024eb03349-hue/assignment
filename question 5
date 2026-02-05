@@ -1,0 +1,42 @@
+#!/bin/bash
+
+DIR_A="dirA"
+DIR_B="dirB"
+
+# Check if directories exist
+if [ ! -d "$DIR_A" ]; then
+    echo "Error: Directory $DIR_A does not exist."
+    exit 1
+fi
+
+if [ ! -d "$DIR_B" ]; then
+    echo "Error: Directory $DIR_B does not exist."
+    exit 1
+fi
+
+echo "=== Files only in $DIR_A ==="
+find "$DIR_A" -type f -printf "%P\n" | while read file; do
+    if [ ! -f "$DIR_B/$file" ]; then
+        echo "$file"
+    fi
+done
+
+echo ""
+echo "=== Files only in $DIR_B ==="
+find "$DIR_B" -type f -printf "%P\n" | while read file; do
+    if [ ! -f "$DIR_A/$file" ]; then
+        echo "$file"
+    fi
+done
+
+echo ""
+echo "=== Files with same name but different content ==="
+find "$DIR_A" -type f -printf "%P\n" | while read file; do
+    if [ -f "$DIR_B/$file" ]; then
+        if ! cmp -s "$DIR_A/$file" "$DIR_B/$file"; then
+            echo "$file (content differs)"
+        else
+            echo "$file (identical content)"
+        fi
+    fi
+done
